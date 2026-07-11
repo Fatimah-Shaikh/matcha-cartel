@@ -1,5 +1,6 @@
 "use client";
 
+import Image from "next/image";
 import WordmarkDistort from "./WordmarkDistort";
 
 const CELLS = Array.from({ length: 15 }, (_, i) => {
@@ -7,8 +8,7 @@ const CELLS = Array.from({ length: 15 }, (_, i) => {
   return {
     fig: String(n).padStart(2, "0"),
     lot: "LOT-" + String((n * 37) % 90 + 10).padStart(2, "0"),
-    angle: (n * 53) % 360,
-    hue: 78 + ((n * 17) % 30),
+    src: `/matcha/archive-${String(n).padStart(2, "0")}.jpg`,
   };
 });
 
@@ -32,23 +32,27 @@ export default function Archive() {
           {CELLS.map((c) => (
             <div
               key={c.fig}
-              className="group relative aspect-square cursor-crosshair overflow-hidden border border-line"
+              className="group relative aspect-square cursor-crosshair overflow-hidden border border-line bg-surface"
             >
-              <div
-                aria-hidden
-                className="absolute inset-0 grayscale transition-[filter,transform] duration-500 ease-out group-hover:scale-110 group-hover:grayscale-0"
-                style={{
-                  background: `linear-gradient(${c.angle}deg, hsl(${c.hue} 65% 22%), hsl(${c.hue} 70% 12%) 60%, #0b0d0a)`,
-                }}
+              <Image
+                src={c.src}
+                alt={`Specimen ${c.fig}`}
+                fill
+                sizes="(max-width: 640px) 33vw, (max-width: 1024px) 20vw, 180px"
+                className="object-cover grayscale transition-[filter,transform] duration-500 ease-out group-hover:scale-110 group-hover:grayscale-0"
               />
               <div
                 aria-hidden
-                className="grain absolute inset-0 opacity-30 mix-blend-overlay"
+                className="pointer-events-none absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-black/20"
               />
-              <span className="absolute left-1.5 top-1.5 text-[9px] tracking-[0.2em] text-muted-2 transition-colors duration-300 group-hover:text-background/70">
+              <div
+                aria-hidden
+                className="grain pointer-events-none absolute inset-0 opacity-20 mix-blend-overlay"
+              />
+              <span className="absolute left-1.5 top-1.5 text-[9px] tracking-[0.2em] text-white/70 drop-shadow">
                 ({c.fig})
               </span>
-              <span className="absolute bottom-1.5 left-1.5 translate-y-1 text-[9px] font-semibold tracking-[0.15em] text-accent opacity-0 transition-all duration-300 group-hover:translate-y-0 group-hover:opacity-100">
+              <span className="absolute bottom-1.5 left-1.5 translate-y-1 text-[9px] font-semibold tracking-[0.15em] text-accent opacity-0 drop-shadow transition-all duration-300 group-hover:translate-y-0 group-hover:opacity-100">
                 {c.lot}
               </span>
             </div>
@@ -80,9 +84,12 @@ export default function Archive() {
         className="mt-16 h-[22vw] max-h-[260px] min-h-[140px] w-full sm:h-[16vw]"
       />
 
-      <p className="mt-4 text-right text-[11px] tracking-[0.3em] text-muted">
-        (MOVE TO DISTORT)
-      </p>
+      <div className="mt-4 flex flex-col gap-1 text-right text-[11px] tracking-[0.3em] text-muted sm:flex-row sm:items-center sm:justify-between">
+        <span className="text-[9px] tracking-[0.15em] text-muted-2">
+          SPECIMEN PHOTOGRAPHY: WIKIMEDIA COMMONS CONTRIBUTORS, CC BY-SA
+        </span>
+        <span>(MOVE TO DISTORT)</span>
+      </div>
     </section>
   );
 }

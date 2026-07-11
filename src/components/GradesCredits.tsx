@@ -1,10 +1,12 @@
 "use client";
 
+import Image from "next/image";
+
 const GRADES = [
   {
     tag: "LOT 01 — FIRST FLUSH",
     name: "CEREMONIAL GRADE",
-    swatch: "linear-gradient(145deg, #2f5f1c, #4d8a26 55%, #6bbf2f)",
+    photo: "/matcha/grade-ceremonial.jpg",
     props: [
       ["ORIGIN", "Uji, Kyoto Prefecture — shade-grown, first flush"],
       ["COLOR", "Vivid jade, near-fluorescent green"],
@@ -17,7 +19,7 @@ const GRADES = [
   {
     tag: "LOT 02 — LATE FLUSH",
     name: "CULINARY GRADE",
-    swatch: "linear-gradient(145deg, #3d4a1a, #5c6a24 55%, #7c8a30)",
+    photo: "/matcha/grade-culinary.jpg",
     props: [
       ["ORIGIN", "Later flush, broader growing regions"],
       ["COLOR", "Deeper olive-green, less luminous"],
@@ -88,11 +90,15 @@ export default function GradesCredits() {
           <div className="flex flex-col gap-8">
             {GRADES.map((g) => (
               <div key={g.name} className="flex gap-4">
-                <div
-                  className="h-20 w-20 shrink-0 border border-black/30"
-                  style={{ background: g.swatch }}
-                  aria-hidden
-                />
+                <div className="relative h-20 w-20 shrink-0 overflow-hidden border border-black/30">
+                  <Image
+                    src={g.photo}
+                    alt={g.name}
+                    fill
+                    sizes="80px"
+                    className="object-cover"
+                  />
+                </div>
                 <div>
                   <p className="text-[10px] font-semibold tracking-[0.15em] opacity-60">
                     {g.tag}
