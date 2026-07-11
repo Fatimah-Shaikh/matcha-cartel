@@ -5,6 +5,8 @@ import Benefits from "@/components/Benefits";
 import HyperfixationGrid from "@/components/HyperfixationGrid";
 import ConfiscatedGoods from "@/components/ConfiscatedGoods";
 import ProcessSteps from "@/components/ProcessSteps";
+import Archive from "@/components/Archive";
+import GradesCredits from "@/components/GradesCredits";
 import Footer from "@/components/Footer";
 
 export default function Home() {
@@ -17,6 +19,8 @@ export default function Home() {
       <HyperfixationGrid />
       <ConfiscatedGoods />
       <ProcessSteps />
+      <Archive />
+      <GradesCredits />
       <Footer />
     </main>
   );

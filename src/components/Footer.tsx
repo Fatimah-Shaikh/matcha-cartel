@@ -44,7 +44,7 @@ export default function Footer() {
       <div className="relative mb-12 flex items-end justify-between border-b border-line pb-4">
         <div>
           <p className="text-[11px] tracking-[0.35em] text-accent">
-            FIG. 08 — PERSONS OF INTEREST
+            FIG. 10 — PERSONS OF INTEREST
           </p>
           <h2 className="mt-2 font-sans text-3xl font-semibold uppercase tracking-tight text-foreground sm:text-5xl">
             The Dealers
