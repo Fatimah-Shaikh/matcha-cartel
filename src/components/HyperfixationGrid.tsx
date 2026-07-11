@@ -2,6 +2,7 @@
 
 import { useRef, useState } from "react";
 import { motion } from "framer-motion";
+import { useReducedMotion } from "@/lib/useReducedMotion";
 
 const ITEMS = [
   { fig: "01", code: "CHAWAN", note: "wide-mouth bowl, glazed interior", rot: -6 },
@@ -15,10 +16,12 @@ const ITEMS = [
 export default function HyperfixationGrid() {
   const boundsRef = useRef<HTMLDivElement>(null);
   const [top, setTop] = useState<string | null>(null);
+  const [dragged, setDragged] = useState(false);
+  const reduced = useReducedMotion();
 
   return (
     <section className="relative border-t border-line bg-background px-5 py-16 sm:px-10 sm:py-24">
-      <div className="mb-10 flex items-end justify-between">
+      <div className="mb-6 flex flex-col gap-2 sm:mb-10 sm:flex-row sm:items-end sm:justify-between">
         <div>
           <p className="text-[11px] tracking-[0.35em] text-accent">
             FIG. 05 — PERSONAL EFFECTS
@@ -27,8 +30,15 @@ export default function HyperfixationGrid() {
             Hyperfixation
           </h2>
         </div>
-        <p className="hidden text-right text-[11px] leading-relaxed tracking-[0.2em] text-muted sm:block">
-          DRAG TO REARRANGE<br />6 ITEMS CATALOGUED
+        <p
+          className={
+            dragged
+              ? "text-left text-[11px] leading-relaxed tracking-[0.2em] text-muted sm:text-right"
+              : "animate-pulse text-left text-[12px] font-semibold tracking-[0.2em] text-accent sm:text-right"
+          }
+        >
+          ⟡ CLICK AND DRAG ANY CARD ⟡<br className="hidden sm:block" />
+          <span className="sm:hidden"> </span>6 ITEMS CATALOGUED
         </p>
       </div>
 
@@ -47,13 +57,26 @@ export default function HyperfixationGrid() {
             dragConstraints={boundsRef}
             dragElastic={0.15}
             dragMomentum={false}
-            onDragStart={() => setTop(it.fig)}
+            onDragStart={() => {
+              setTop(it.fig);
+              setDragged(true);
+            }}
             whileDrag={{ scale: 1.06, cursor: "grabbing" }}
             initial={{
               rotate: it.rot,
               x: 24 + (i % 3) * 200,
               y: 24 + Math.floor(i / 3) * 230,
             }}
+            animate={
+              i === 0 && !reduced && !dragged
+                ? { rotate: [it.rot, it.rot - 12, it.rot + 9, it.rot - 5, it.rot] }
+                : undefined
+            }
+            transition={
+              i === 0 && !reduced && !dragged
+                ? { duration: 1.6, delay: 0.9, ease: "easeInOut", times: [0, 0.25, 0.55, 0.8, 1] }
+                : undefined
+            }
             style={{ zIndex: top === it.fig ? 20 : 10 - i, touchAction: "none" }}
             className="absolute w-[150px] cursor-grab select-none border border-line bg-gradient-to-b from-surface-2 to-surface p-3 shadow-[0_8px_24px_rgba(0,0,0,0.4)] sm:w-[180px] sm:p-4"
           >

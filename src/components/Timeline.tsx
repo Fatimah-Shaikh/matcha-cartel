@@ -1,7 +1,8 @@
 "use client";
 
 import { useEffect, useRef, useState } from "react";
-import { motion, useMotionValue, useTransform } from "framer-motion";
+import { animate, motion, useMotionValue, useTransform } from "framer-motion";
+import { useReducedMotion } from "@/lib/useReducedMotion";
 
 const EVENTS = [
   {
@@ -41,6 +42,8 @@ export default function Timeline() {
   const trackRef = useRef<HTMLDivElement>(null);
   const x = useMotionValue(0);
   const [constraint, setConstraint] = useState(0);
+  const [dragged, setDragged] = useState(false);
+  const reduced = useReducedMotion();
   const progress = useTransform(x, [-constraint || -1, 0], [1, 0]);
   const barScale = useTransform(progress, (v) => Math.max(0.06, v));
 
@@ -62,6 +65,18 @@ export default function Timeline() {
     };
   }, []);
 
+  useEffect(() => {
+    if (reduced || dragged) return;
+    // Auto-peek: nudges the track to demonstrate it's draggable, then settles back.
+    const controls = animate(x, [0, -70, 0], {
+      duration: 1.6,
+      delay: 0.9,
+      ease: "easeInOut",
+      times: [0, 0.6, 1],
+    });
+    return () => controls.stop();
+  }, [reduced, dragged, x]);
+
   return (
     <section className="relative overflow-hidden border-t border-line bg-background py-16 sm:py-24">
       <div className="mb-10 flex items-end justify-between px-5 sm:px-10">
@@ -73,8 +88,14 @@ export default function Timeline() {
             Chain of Custody
           </h2>
         </div>
-        <p className="hidden text-right text-[11px] leading-relaxed tracking-[0.2em] text-muted sm:block">
-          DRAG TO VIEW ⟵ ⟶<br />5 RECORDS ON FILE
+        <p
+          className={
+            dragged
+              ? "text-left text-[11px] leading-relaxed tracking-[0.2em] text-muted sm:text-right"
+              : "animate-pulse text-left text-[12px] font-semibold tracking-[0.2em] text-accent sm:text-right"
+          }
+        >
+          ⟵ DRAG TO VIEW ⟶<br />5 RECORDS ON FILE
         </p>
       </div>
 
@@ -88,6 +109,7 @@ export default function Timeline() {
           drag="x"
           dragConstraints={{ left: -constraint, right: 0 }}
           dragElastic={0.08}
+          onDragStart={() => setDragged(true)}
           style={{ x }}
         >
           {EVENTS.map((ev) => (

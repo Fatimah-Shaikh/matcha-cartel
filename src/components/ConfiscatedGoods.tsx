@@ -14,12 +14,16 @@ const ITEMS: { fig: string; code: string; seized: string; note: string; status: 
   { fig: "06", code: "LOT — GENMAICHA BLEND", seized: "LOT 4523", note: "handler: unknown", status: "HELD" },
 ];
 
+const DEMO_MS = 3200;
+
 export default function ConfiscatedGoods() {
   const sectionRef = useRef<HTMLDivElement>(null);
   const target = useRef({ x: 0.5, y: 0.4 });
   const current = useRef({ x: 0.5, y: 0.4 });
   const raf = useRef<number | null>(null);
+  const movedRef = useRef(false);
   const [moved, setMoved] = useState(false);
+  const [demoing, setDemoing] = useState(false);
   const reduced = useReducedMotion();
 
   useEffect(() => {
@@ -33,15 +37,23 @@ export default function ConfiscatedGoods() {
       target.current.y = Math.min(Math.max((clientY - r.top) / r.height, 0), 1);
     };
 
+    const takeOver = () => {
+      if (!movedRef.current) {
+        movedRef.current = true;
+        setMoved(true);
+        setDemoing(false);
+      }
+    };
+
     const onMove = (e: MouseEvent) => {
       setFromEvent(e.clientX, e.clientY);
-      if (!moved) setMoved(true);
+      takeOver();
     };
     const onTouch = (e: TouchEvent) => {
       const t = e.touches[0];
       if (!t) return;
       setFromEvent(t.clientX, t.clientY);
-      if (!moved) setMoved(true);
+      takeOver();
     };
 
     const tick = () => {
@@ -53,16 +65,34 @@ export default function ConfiscatedGoods() {
     };
     raf.current = requestAnimationFrame(tick);
 
+    // Auto-demo sweep: shows first-time visitors the beam follows their cursor
+    // before handing control back over as soon as they move the mouse themselves.
+    setDemoing(true);
+    const demoStart = performance.now();
+    const runDemo = (now: number) => {
+      if (movedRef.current) return;
+      const t = (now - demoStart) / DEMO_MS;
+      if (t >= 1) {
+        setDemoing(false);
+        return;
+      }
+      target.current.x = 0.5 + 0.3 * Math.sin(t * Math.PI * 2.4);
+      target.current.y = 0.4 + 0.16 * Math.sin(t * Math.PI * 1.5 + 1.1);
+      requestAnimationFrame(runDemo);
+    };
+    const demoRaf = requestAnimationFrame(runDemo);
+
     el.addEventListener("mousemove", onMove);
     el.addEventListener("touchmove", onTouch, { passive: true });
     el.addEventListener("touchstart", onTouch, { passive: true });
     return () => {
       if (raf.current) cancelAnimationFrame(raf.current);
+      cancelAnimationFrame(demoRaf);
       el.removeEventListener("mousemove", onMove);
       el.removeEventListener("touchmove", onTouch);
       el.removeEventListener("touchstart", onTouch);
     };
-  }, [moved, reduced]);
+  }, [reduced]);
 
   const maskStyle: React.CSSProperties = reduced
     ? { background: "transparent" }
@@ -96,6 +126,17 @@ export default function ConfiscatedGoods() {
           EVIDENCE ROOM<br />ACCESS: RESTRICTED
         </p>
       </div>
+
+      {!reduced && !moved && (
+        <p
+          className={
+            "relative z-30 mb-4 text-center text-[13px] font-semibold tracking-[0.25em] text-accent transition-opacity duration-500 " +
+            (demoing ? "animate-pulse opacity-100" : "opacity-90")
+          }
+        >
+          ⟵ MOVE YOUR CURSOR (OR FINGER) OVER THE GRID ⟶
+        </p>
+      )}
 
       <div className="relative">
         <div className="relative z-10 grid grid-cols-2 gap-3 sm:grid-cols-3 sm:gap-4">
@@ -148,17 +189,6 @@ export default function ConfiscatedGoods() {
         />
         <div aria-hidden className="pointer-events-none absolute inset-0 z-20" style={maskStyle} />
       </div>
-
-      {!reduced && (
-        <p
-          className={
-            "relative z-30 mt-8 text-center text-[11px] tracking-[0.3em] text-muted transition-opacity duration-700 " +
-            (moved ? "opacity-0" : "opacity-100")
-          }
-        >
-          ⟵ MOVE THE LIGHT TO INSPECT ⟶
-        </p>
-      )}
 
       <div
         aria-hidden
